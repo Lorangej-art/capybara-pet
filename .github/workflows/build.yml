@@ -1,0 +1,59 @@
+name: 构建桌面宠物 (Windows + macOS)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  # ─── Windows ───────────────────────────────────────────
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: |
+          pip install PyQt5 pyinstaller
+
+      - name: 打包 EXE
+        run: |
+          pyinstaller --onefile --noconsole --name "CapybaraPet" lulu_pet.py
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: CapybaraPet-Windows
+          path: dist/CapybaraPet.exe
+          retention-days: 30
+
+  # ─── macOS ─────────────────────────────────────────────
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: |
+          pip3 install PyQt5 pyinstaller
+
+      - name: 打包 macOS 应用
+        run: |
+          pyinstaller --onefile --noconsole --add-data "assets:assets" --name "CapybaraPet" lulu_pet.py
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: CapybaraPet-macOS
+          path: dist/CapybaraPet
+          retention-days: 30
